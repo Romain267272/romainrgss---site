@@ -81,7 +81,8 @@
       border: 2px solid #555;
       border-radius: 10px;
       padding: 10px 20px;
-      margin-bottom: 30px;
+      /* Correction : Augmentation de la marge en bas pour décoller le pseudo */
+      margin-bottom: 50px;
       display: inline-block;
       z-index: 1;
     }
@@ -278,6 +279,7 @@
   </style>
 </head>
 <body>
+  <!-- TRÈS IMPORTANT : Assurez-vous que le fichier audio est nommé EXACTEMENT "son (1).mp3" et qu'il est DANS LE MÊME DOSSIER que ce fichier HTML. -->
   <audio id="background-music" loop>
     <source src="son (1).mp3" type="audio/mpeg">
     Votre navigateur ne supporte pas l'élément audio.
@@ -286,8 +288,7 @@
   <div class="card">
     <img src="https://i.pinimg.com/736x/59/69/11/59691152b357b08b5f8f5e6ed5d7177d.jpg" alt="Photo de profil" class="profile-pic">
     
-    <!-- Correction : Le pseudo a été mis à jour avec une police plus lisible pour afficher correctement tous les caractères. -->
-    <div class="pseudo">ROMAINRGSS</div>
+    <div class="pseudo">Romainrgss</div>
     
     <div class="squares-container">
       <a href="https://www.tiktok.com/@romainrgss" target="_blank" class="square">
@@ -346,39 +347,42 @@
           musicIcon.classList.add('fa-pause');
         }
       };
-
-      // Tente de lancer la musique automatiquement
-      const playPromise = music.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            // L'autoplay a fonctionné, met à jour le bouton
-            updateMusicButton();
-            console.log("Autoplay réussi !");
-          })
-          .catch(error => {
-            // L'autoplay a été bloqué, le bouton reste sur l'état "play"
-            console.log("Autoplay bloqué, le bouton de lecture est affiché.");
-            updateMusicButton(); // S'assure que le bouton est dans l'état initial (play)
-          });
-      } else {
-        updateMusicButton();
-      }
-      
-      // Ajoute un écouteur d'événements pour le nouveau bouton de bascule
-      musicToggleBtn.addEventListener('click', () => {
-        if (music.paused) {
-          music.play();
-        } else {
-          music.pause();
-        }
-        // Met à jour l'icône et le texte immédiatement après l'interaction
-        updateMusicButton();
-      });
       
       // Écoute les événements 'play' et 'pause' pour synchroniser le bouton
       music.addEventListener('play', updateMusicButton);
       music.addEventListener('pause', updateMusicButton);
+
+      // NOUVELLE LOGIQUE : Empêche les actions multiples qui peuvent causer une AbortError.
+      // Cette variable sert de "verrou" pour s'assurer qu'une seule action (play ou pause) est en cours.
+      let isMusicActionInProgress = false;
+
+      // Gère l'événement de clic sur le bouton de musique
+      musicToggleBtn.addEventListener('click', () => {
+        // Si une action de lecture/pause est déjà en cours, on ignore le clic.
+        if (isMusicActionInProgress) {
+          return;
+        }
+
+        if (music.paused) {
+          // On passe le "verrou" à true avant de démarrer l'action.
+          isMusicActionInProgress = true; 
+          music.play().then(() => {
+            // Une fois que la lecture a démarré avec succès, on retire le "verrou".
+            isMusicActionInProgress = false; 
+          }).catch(error => {
+            // Si une erreur se produit (comme l'AbortError que vous avez vue), 
+            // on retire le "verrou" pour permettre une nouvelle tentative.
+            // Le navigateur peut aussi refuser de jouer la musique si le son n'a pas été déclenché par un clic de l'utilisateur.
+            isMusicActionInProgress = false;
+            console.error("Erreur de lecture de la musique:", error);
+          });
+        } else {
+          // Pour la pause, l'action est instantanée, donc on retire le "verrou" immédiatement.
+          isMusicActionInProgress = true;
+          music.pause();
+          isMusicActionInProgress = false;
+        }
+      });
 
       // --- Logique pour le mini-jeu du vaisseau spatial ---
       const canvas = document.getElementById('gameCanvas');
