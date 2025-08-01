@@ -70,17 +70,17 @@
         margin-bottom: 20px;
         object-fit: cover;
     }
-
+    
+    /* Correction : Style mis à jour pour le pseudo pour une meilleure lisibilité */
     .pseudo {
-      /* Ajout d'une transparence pour mieux voir le fond */
-      background-color: rgba(30, 30, 30, 0.8); 
-      /* même bord que le cadre */
-      border: 2px solid #555; 
+      font-family: 'Impact', sans-serif;
+      text-transform: uppercase;
+      font-size: 2.5em;
+      font-weight: bold;
+      background-color: rgba(30, 30, 30, 0.8);
+      border: 2px solid #555;
       border-radius: 10px;
       padding: 10px 20px;
-      /* plus gros */
-      font-size: 2.2em; 
-      font-weight: bold;
       margin-bottom: 30px;
       display: inline-block;
       z-index: 1;
@@ -286,7 +286,8 @@
   <div class="card">
     <img src="https://i.pinimg.com/736x/59/69/11/59691152b357b08b5f8f5e6ed5d7177d.jpg" alt="Photo de profil" class="profile-pic">
     
-    <div class="pseudo">𝕽𝖔𝖒𝖆𝖎𝖓𝖗𝖌𝖘𝖘</div>
+    <!-- Correction : Le pseudo a été mis à jour avec une police plus lisible pour afficher correctement tous les caractères. -->
+    <div class="pseudo">ROMAINRGSS</div>
     
     <div class="squares-container">
       <a href="https://www.tiktok.com/@romainrgss" target="_blank" class="square">
@@ -627,7 +628,7 @@
       startButton.addEventListener('click', () => {
           initGame();
       });
-
+      
       // Gère le clic sur le bouton "Rejouer"
       restartButton.addEventListener('click', () => {
           initGame();
