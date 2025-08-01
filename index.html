@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     body {
-      /* Mise en place du fond d'image */
       background-image: url('https://i.pinimg.com/1200x/55/63/77/556377147a541ee4932634f55e226791.jpg');
       background-size: cover;
       background-repeat: no-repeat;
@@ -24,54 +23,45 @@
       padding-top: 80px;
     }
 
-    /* Masque le lecteur audio pour qu'il soit invisible */
     #background-music {
       display: none;
     }
     
     .card {
-      /* Ajout d'une transparence pour mieux voir le fond */
       background-color: rgba(30, 30, 30, 0.8); 
       border: 2px solid #555;
       border-radius: 12px;
-      /* J'ai ajusté le padding en haut et en bas pour faire de la place à l'image et raccourcir le cadre */
       padding: 20px 30px 40px 30px;
       width: 320px;
       box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
       text-align: center;
-      /* Assure que la carte est au-dessus du fond */
       z-index: 1; 
       
-      /* Modification pour allonger le cadre vers le bas */
-      min-height: 250px; /* Hauteur minimale réduite */
+      min-height: 250px; 
       display: flex;
       flex-direction: column;
       align-items: center;
 
-      /* Animation de remontée */
       opacity: 0;
-      transform: translateY(100vh); /* Démarre la carte en bas de l'écran */
-      transition: opacity 0.8s ease-out, transform 0.8s ease-out; /* Ajoute une transition fluide */
-      position: relative; /* Pour que le positionnement absolu du bouton fonctionne */
+      transform: translateY(100vh); 
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out; 
+      position: relative; 
     }
 
-    /* Classe qui s'ajoute via JavaScript pour déclencher l'animation */
     .card.show {
       opacity: 1;
-      transform: translateY(0); /* Remonte la carte à sa position initiale */
+      transform: translateY(0); 
     }
     
-    /* Nouveau style pour la photo de profil */
     .profile-pic {
         width: 120px;
         height: 120px;
-        border-radius: 50%; /* Pour une forme de cercle */
+        border-radius: 50%; 
         border: 2px solid #555;
         margin-bottom: 20px;
         object-fit: cover;
     }
     
-    /* Correction : Style mis à jour pour le pseudo pour une meilleure lisibilité */
     .pseudo {
       font-family: 'Impact', sans-serif;
       text-transform: uppercase;
@@ -81,55 +71,46 @@
       border: 2px solid #555;
       border-radius: 10px;
       padding: 10px 20px;
-      /* Correction : Augmentation de la marge en bas pour décoller le pseudo */
       margin-bottom: 50px;
       display: inline-block;
       z-index: 1;
     }
     
-    /* Conteneur pour les carrés afin de les centrer */
     .squares-container {
       display: flex;
       justify-content: center;
-      gap: 20px; /* Ajoute de l'espace entre les carrés */
-      /* Correction : J'ai ajusté la marge du haut pour les déplacer vers le haut */
+      gap: 20px; 
       margin-top: -20px;
-      /* J'ai ajouté une largeur pour que le conteneur soit centré avec le bouton de musique */
       width: 300px;
     }
 
-    /* Nouveau style pour les carrés */
     .square {
       width: 80px;
       height: 80px;
-      /* Correction : La couleur de fond est maintenant foncée pour correspondre au reste */
       background-color: rgba(30, 30, 30, 0.8);
-      /* Correction : La bordure est maintenant plus épaisse et foncée pour correspondre au reste */
       border: 2px solid #555;
       border-radius: 8px;
       display: flex;
       justify-content: center;
       align-items: center;
       cursor: pointer;
-      transition: transform 0.2s; /* Ajout d'une transition pour l'effet de survol */
+      transition: transform 0.2s; 
     }
 
     .square:hover {
-      transform: scale(1.1); /* Effet de zoom au survol */
+      transform: scale(1.1); 
     }
 
-    /* Style des icônes à l'intérieur des carrés */
     .square i {
       font-size: 3em;
       color: white;
     }
 
-    /* Nouveau style pour le bouton de musique rectangulaire */
     .music-toggle-button {
-      display: flex; /* Utilisation de flexbox pour aligner le texte et l'icône */
-      justify-content: flex-start; /* Aligne le contenu à gauche */
+      display: flex; 
+      justify-content: flex-start; 
       align-items: center;
-      width: 300px; /* Largeur du bouton rectangulaire augmentée */
+      width: 300px; 
       padding: 15px 25px;
       margin-top: 20px;
       font-size: 1.2em;
@@ -140,7 +121,7 @@
       border-radius: 10px;
       cursor: pointer;
       transition: background-color 0.3s ease-in-out, transform 0.2s;
-      text-align: left; /* Pour que le texte s'aligne correctement */
+      text-align: left; 
     }
 
     .music-toggle-button:hover {
@@ -154,19 +135,16 @@
         justify-content: center;
         font-size: 1.5em; 
         width: 40px; 
-        /* Correction : Ajoute une hauteur fixe pour empêcher le décalage */
         height: 40px; 
         margin-right: 15px;
-        /* Correction : Empêche le conteneur de se réduire */
         flex-shrink: 0;
-        /* Ajustement de la marge pour décaler le logo à gauche */
         margin-left: -10px; 
     }
 
     .music-toggle-button .music-info {
         display: flex;
         align-items: center;
-        flex-grow: 1; /* Permet au conteneur de s'étendre */
+        flex-grow: 1; 
     }
 
     .music-toggle-button .music-info .music-image {
@@ -197,12 +175,19 @@
         font-weight: normal;
         color: #bbb;
     }
+
+    /* Nouveau style pour le message d'erreur de la musique */
+    #music-error {
+        color: #e74c3c;
+        font-size: 0.9em;
+        margin-top: 5px;
+        display: none; /* Masqué par défaut */
+    }
     
-    /* Styles pour le conteneur du jeu, maintenant un long rectangle horizontal encore plus fin */
     #game-container {
-      margin-top: 10px; /* Déplacé plus haut */
-      width: 300px; /* Même largeur que le bouton de musique */
-      height: 100px; /* Hauteur réduite pour un aspect plus fin */
+      margin-top: 10px; 
+      width: 300px; 
+      height: 100px; 
       border: 2px solid #555;
       border-radius: 8px;
       background-color: rgba(30, 30, 30, 0.8);
@@ -215,16 +200,14 @@
       flex-direction: column;
     }
     
-    /* Style pour le canvas du jeu, pour qu'il prenne toute la place */
     #gameCanvas {
       width: 100%;
       height: 100%;
       background-color: rgba(30, 30, 30, 0.8);
       display: block;
-      image-rendering: pixelated; /* Pour le rendu pixel art */
+      image-rendering: pixelated; 
     }
 
-    /* Style pour le message de jeu */
     #game-message {
       position: absolute;
       top: 50%;
@@ -234,31 +217,28 @@
       font-weight: bold;
       text-align: center;
       width: 100%;
-      padding: 20px; /* Augmenté le padding pour un meilleur espacement */
+      padding: 20px; 
       background-color: rgba(30, 30, 30, 0.9);
       border-radius: 5px;
-      display: none; /* Masqué par défaut */
+      display: none; 
       z-index: 10;
       flex-direction: column;
       justify-content: center;
       align-items: center;
     }
 
-    /* Style pour le titre "Game Over" */
     #game-message h2 {
-        font-size: 4em; /* Augmenté la taille pour que ce soit plus visible */
-        color: #e74c3c; /* Rouge pour l'attention */
-        margin-bottom: 5px; /* Réduit l'espace en bas pour le rapprocher du haut */
-        text-shadow: 2px 2px 4px #000; /* Ajout d'une ombre portée pour un meilleur contraste */
+        font-size: 4em; 
+        color: #e74c3c; 
+        margin-bottom: 5px; 
+        text-shadow: 2px 2px 4px #000; 
     }
 
-    /* Style pour le score final */
     #game-message p {
-        font-size: 0.9em; /* Taille plus petite pour le score */
-        margin-bottom: 20px; /* Ajoute un espace en bas pour le séparer du bouton */
+        font-size: 0.9em; 
+        margin-bottom: 20px; 
     }
 
-    /* Nouveau style pour le bouton de jeu */
     .game-button {
       background-color: #2a2a2a;
       color: white;
@@ -279,7 +259,6 @@
   </style>
 </head>
 <body>
-  <!-- TRÈS IMPORTANT : Assurez-vous que le fichier audio est nommé EXACTEMENT "son (1).mp3" et qu'il est DANS LE MÊME DOSSIER que ce fichier HTML. -->
   <audio id="background-music" loop>
     <source src="son (1).mp3" type="audio/mpeg">
     Votre navigateur ne supporte pas l'élément audio.
@@ -314,6 +293,7 @@
         </div>
       </div>
     </button>
+    <div id="music-error"></div>
     
     <div id="game-container">
         <canvas id="gameCanvas" style="display: none;"></canvas>
@@ -325,65 +305,56 @@
   </div>
 
   <script>
-    // Attend que le DOM soit complètement chargé
     document.addEventListener('DOMContentLoaded', () => {
       const card = document.querySelector('.card');
       const music = document.getElementById('background-music');
       const musicToggleBtn = document.getElementById('music-toggle-btn');
       const musicIcon = musicToggleBtn.querySelector('.icon-container i');
+      const musicErrorDiv = document.getElementById('music-error');
       
-      // Ajoute la classe 'show' pour déclencher l'animation de la carte
       setTimeout(() => {
         card.classList.add('show');
       }, 100);
 
-      // Met à jour l'état initial du bouton de musique
       const updateMusicButton = () => {
         if (music.paused) {
           musicIcon.classList.remove('fa-pause');
           musicIcon.classList.add('fa-play');
+          console.log("LOG: Bouton mis à jour - musique en pause.");
         } else {
           musicIcon.classList.remove('fa-play');
           musicIcon.classList.add('fa-pause');
+          console.log("LOG: Bouton mis à jour - musique en lecture.");
         }
       };
       
-      // Écoute les événements 'play' et 'pause' pour synchroniser le bouton
-      music.addEventListener('play', updateMusicButton);
+      music.addEventListener('play', () => {
+        updateMusicButton();
+        musicErrorDiv.style.display = 'none';
+      });
       music.addEventListener('pause', updateMusicButton);
 
-      // NOUVELLE LOGIQUE : Empêche les actions multiples qui peuvent causer une AbortError.
-      // Cette variable sert de "verrou" pour s'assurer qu'une seule action (play ou pause) est en cours.
-      let isMusicActionInProgress = false;
-
-      // Gère l'événement de clic sur le bouton de musique
-      musicToggleBtn.addEventListener('click', () => {
-        // Si une action de lecture/pause est déjà en cours, on ignore le clic.
-        if (isMusicActionInProgress) {
-          return;
-        }
-
+      musicToggleBtn.addEventListener('click', async () => {
+        console.log("LOG: Clic sur le bouton de musique détecté.");
+        musicErrorDiv.style.display = 'none'; // Efface le message d'erreur précédent
         if (music.paused) {
-          // On passe le "verrou" à true avant de démarrer l'action.
-          isMusicActionInProgress = true; 
-          music.play().then(() => {
-            // Une fois que la lecture a démarré avec succès, on retire le "verrou".
-            isMusicActionInProgress = false; 
-          }).catch(error => {
-            // Si une erreur se produit (comme l'AbortError que vous avez vue), 
-            // on retire le "verrou" pour permettre une nouvelle tentative.
-            // Le navigateur peut aussi refuser de jouer la musique si le son n'a pas été déclenché par un clic de l'utilisateur.
-            isMusicActionInProgress = false;
-            console.error("Erreur de lecture de la musique:", error);
-          });
+          try {
+            console.log("LOG: Tentative de lecture de la musique...");
+            await music.play();
+            console.log("LOG: Lecture de la musique démarrée avec succès.");
+          } catch (error) {
+            console.error("ERREUR: Échec de la lecture de la musique.", error);
+            music.pause(); // Assurez-vous que le lecteur est en pause
+            
+            // Affiche un message d'erreur visible par l'utilisateur
+            musicErrorDiv.textContent = `Erreur : ${error.name} - ${error.message}`;
+            musicErrorDiv.style.display = 'block';
+          }
         } else {
-          // Pour la pause, l'action est instantanée, donc on retire le "verrou" immédiatement.
-          isMusicActionInProgress = true;
+          console.log("LOG: Musique déjà en lecture, tentative de pause.");
           music.pause();
-          isMusicActionInProgress = false;
         }
       });
-
       // --- Logique pour le mini-jeu du vaisseau spatial ---
       const canvas = document.getElementById('gameCanvas');
       const ctx = canvas.getContext('2d');
@@ -397,19 +368,17 @@
       let keys = {};
       
       const gameConfig = {
-          // J'ai réduit la vitesse du joueur de 3 à 2 pour diminuer la sensibilité.
           playerSpeed: 2, 
           bulletSpeed: 5,
           enemySpeed: 0.8,
-          enemySpawnRate: 1500, // en millisecondes
+          enemySpawnRate: 1500, 
           lastSpawnTime: 0,
       };
 
-      // Configuration du joueur (plus détaillé pour le pixel art)
       function createPlayer() {
           return {
-              x: 20, // Vaisseau sur le bord gauche
-              y: canvas.height / 2, // Position Y initiale au centre
+              x: 20, 
+              y: canvas.height / 2, 
               width: 20,
               height: 20,
               color: 'white',
@@ -417,25 +386,19 @@
           };
       }
 
-      // Dessine le joueur avec un style pixel art
       function drawPlayer() {
-        ctx.fillStyle = '#c0c0c0'; // Gris clair pour le corps
-        // corps du vaisseau
+        ctx.fillStyle = '#c0c0c0'; 
         ctx.fillRect(player.x - 5, player.y - 5, 20, 10);
-        // ailerons
         ctx.fillRect(player.x - 10, player.y - 10, 5, 20);
-        // cockpit
-        ctx.fillStyle = '#ffffff'; // Blanc pour le cockpit
+        ctx.fillStyle = '#ffffff'; 
         ctx.fillRect(player.x + 5, player.y - 2.5, 5, 5);
       }
       
-
-      // Configuration des ennemis (qui arrivent de droite à gauche)
       function createEnemy() {
           const size = 16;
           return {
-              x: canvas.width, // Commence sur le bord droit
-              y: Math.random() * (canvas.height - size), // Position y aléatoire
+              x: canvas.width, 
+              y: Math.random() * (canvas.height - size), 
               width: size,
               height: size,
               color: 'red',
@@ -443,26 +406,21 @@
           };
       }
 
-      // Dessine les ennemis avec un style pixel art
       function drawEnemies() {
         enemies.forEach(enemy => {
             const size = enemy.width;
             const x = enemy.x;
             const y = enemy.y;
-            // Corps de l'ennemi
-            ctx.fillStyle = '#a0a0a0'; // Gris pour le corps
+            ctx.fillStyle = '#a0a0a0'; 
             ctx.fillRect(x, y + size/4, size, size/2);
-            // Tête et pieds
             ctx.fillRect(x + size/4, y, size/2, size/4);
             ctx.fillRect(x + size/4, y + size * 3/4, size/2, size/4);
-            // Yeux
-            ctx.fillStyle = '#ffffff'; // Blanc pour les yeux
+            ctx.fillStyle = '#ffffff'; 
             ctx.fillRect(x + size/8, y + size/4, size/8, size/8);
             ctx.fillRect(x + size * 5/8, y + size/4, size/8, size/8);
         });
       }
 
-      // Configuration des balles (qui tirent de gauche à droite)
       function createBullet() {
           return {
               x: player.x + player.width,
@@ -473,19 +431,16 @@
           };
       }
 
-      // Dessine les balles
       function drawBullets() {
-          ctx.fillStyle = '#8a2be2'; // Un bleu-violet pour les balles
+          ctx.fillStyle = '#8a2be2'; 
           bullets.forEach(bullet => {
               ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
           });
       }
 
-      // Met à jour la position des éléments
       function updateGame() {
           if (isGameOver) return;
 
-          // Met à jour le joueur (déplacement vertical)
           if ((keys['ArrowUp'] || keys['w'] || keys['z']) && player.y > 0) {
               player.y -= gameConfig.playerSpeed;
           }
@@ -493,26 +448,22 @@
               player.y += gameConfig.playerSpeed;
           }
 
-          // Met à jour les balles (déplacement horizontal de gauche à droite)
           bullets = bullets.filter(bullet => bullet.x < canvas.width);
           bullets.forEach(bullet => {
               bullet.x += gameConfig.bulletSpeed;
           });
 
-          // Met à jour les ennemis (déplacement de droite à gauche)
           enemies = enemies.filter(enemy => enemy.x + enemy.width > 0);
           enemies.forEach(enemy => {
               enemy.x -= enemy.speed;
           });
 
-          // Création de nouveaux ennemis
           const now = Date.now();
           if (now - gameConfig.lastSpawnTime > gameConfig.enemySpawnRate) {
               enemies.push(createEnemy());
               gameConfig.lastSpawnTime = now;
           }
 
-          // Détection des collisions entre les balles et les ennemis
           bullets.forEach((bullet, bIndex) => {
               enemies.forEach((enemy, eIndex) => {
                   if (
@@ -521,7 +472,6 @@
                       bullet.y < enemy.y + enemy.height &&
                       bullet.y + bullet.height > enemy.y
                   ) {
-                      // Collision !
                       bullets.splice(bIndex, 1);
                       enemies.splice(eIndex, 1);
                       score++;
@@ -529,7 +479,6 @@
               });
           });
 
-          // Détection des collisions entre les ennemis et le joueur
           enemies.forEach((enemy) => {
               if (
                   player.x - player.width / 2 < enemy.x + enemy.width &&
@@ -537,12 +486,10 @@
                   player.y - player.height / 2 < enemy.y + enemy.height &&
                   player.y + player.height / 2 > enemy.y
               ) {
-                  // Collision !
                   player.health--;
                   if (player.health <= 0) {
                       gameOver();
                   } else {
-                      // L'ennemi est retiré même si le joueur a de la vie
                       const enemyIndex = enemies.indexOf(enemy);
                       if (enemyIndex > -1) {
                         enemies.splice(enemyIndex, 1);
@@ -552,7 +499,6 @@
           });
       }
 
-      // La boucle principale du jeu
       function gameLoop() {
           if (isGameOver) {
               cancelAnimationFrame(animationFrameId);
@@ -566,8 +512,7 @@
           drawEnemies();
           drawBullets();
 
-          // Affiche le score et la vie
-          ctx.fillStyle = 'white'; // Blanc pour le texte
+          ctx.fillStyle = 'white'; 
           ctx.font = 'bold 12px monospace';
           ctx.textAlign = 'left';
           ctx.fillText(`SCORE ${score}`, 10, 15);
@@ -576,17 +521,19 @@
           animationFrameId = requestAnimationFrame(gameLoop);
       }
 
-      // Gère la fin du jeu
       function gameOver() {
           isGameOver = true;
-          gameMessage.style.display = 'flex'; // Utilise flexbox pour centrer le contenu
-          canvas.style.display = 'none'; // Masque le canvas
+          gameMessage.style.display = 'flex'; 
+          canvas.style.display = 'none'; 
           cancelAnimationFrame(animationFrameId);
+          console.log("LOG: Jeu terminé. Score final :", score);
       }
 
-      // Initialise le jeu
       function initGame() {
-          // On s'assure que le canvas est visible et qu'il a une taille avant de le dessiner
+          console.log("LOG: Initialisation du jeu...");
+          const gameContainer = document.getElementById('game-container');
+          gameContainer.style.display = 'flex';
+          
           canvas.style.display = 'block';
           canvas.width = canvas.offsetWidth;
           canvas.height = canvas.offsetHeight;
@@ -597,14 +544,13 @@
           score = 0;
           isGameOver = false;
           gameMessage.style.display = 'none';
-          startButton.style.display = 'none'; // Cache le bouton de démarrage
+          startButton.style.display = 'none'; 
           gameConfig.lastSpawnTime = Date.now();
           gameLoop();
+          console.log("LOG: Jeu démarré.");
       }
 
-      // Gère les événements clavier
       document.addEventListener('keydown', (e) => {
-          // Empêche le comportement par défaut (défilement de la page) pour les touches de contrôle
           if (['arrowup', 'arrowdown', 'z', 'w', 's', ' '].includes(e.key.toLowerCase())) {
               e.preventDefault();
           }
@@ -621,19 +567,16 @@
           keys[e.key.toLowerCase()] = false;
       });
 
-      // Gère le redimensionnement de la fenêtre pour que le canvas s'adapte
       window.addEventListener('resize', () => {
           if (!isGameOver) {
              initGame();
           }
       });
 
-      // Gère le clic sur le bouton "Commencer"
       startButton.addEventListener('click', () => {
           initGame();
       });
       
-      // Gère le clic sur le bouton "Rejouer"
       restartButton.addEventListener('click', () => {
           initGame();
       });
