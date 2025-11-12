@@ -1,128 +1,468 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { Plus, Image, Trash2, Edit2, X, Download } from 'lucide-react';
+
+export default function NotesApp() {
+  const [notes, setNotes] = useState([]);
+  const [selectedNote, setSelectedNote] = useState(null);
+  const [isEditing, setIsEditing] = useState(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+  const [contextMenu, setContextMenu] = useState(null);
+  const [draggedNote, setDraggedNote] = useState(null);
+  const [dragOverNote, setDragOverNote] = useState(null);
+  const fileInputRef = useRef(null);
+  const inputRef = useRef(null);
+  const contentRef = useRef(null);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  useEffect(() => {
+    const handleClick = () => setContextMenu(null);
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, []);
+
+  const addNote = () => {
+    const newNote = {
+      id: Date.now(),
+      title: '',
+      content: ''
+    };
+    setNotes([newNote, ...notes]);
+    setSelectedNote(newNote);
+    setIsEditing(newNote.id);
+    setEditTitle('');
+  };
+
+  const finishEditingTitle = (id) => {
+    if (editTitle.trim()) {
+      setNotes(notes.map(n => n.id === id ? { ...n, title: editTitle } : n));
+      if (selectedNote?.id === id) {
+        setSelectedNote({ ...selectedNote, title: editTitle });
+      }
+    } else if (!notes.find(n => n.id === id)?.title) {
+      deleteNote(id);
+    }
+    setIsEditing(null);
+    setEditTitle('');
+  };
+
+  const updateContent = (newContent) => {
+    setNotes(notes.map(n => n.id === selectedNote.id ? { ...n, content: newContent } : n));
+    setSelectedNote({ ...selectedNote, content: newContent });
+  };
+
+  const deleteNote = (id) => {
+    const newNotes = notes.filter(n => n.id !== id);
+    setNotes(newNotes);
+    if (selectedNote?.id === id) {
+      setSelectedNote(newNotes[0] || null);
+    }
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const imgId = `img-${Date.now()}`;
+        const imgWrapper = `<div class="image-wrapper" style="position: relative; display: inline-block; margin: 16px 0; width: 100%; max-width: 600px; cursor: move; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">
+          <img src="${event.target.result}" data-img-id="${imgId}" style="width: 100%; border-radius: 8px; display: block; pointer-events: none; user-select: none; -webkit-user-drag: none;" />
+          <button class="delete-image-btn" data-img-id="${imgId}" style="position: absolute; top: -12px; right: -12px; background: rgba(0,0,0,0.7); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; line-height: 1; z-index: 10;">×</button>
+          <div class="resize-handle" style="position: absolute; bottom: -12px; right: -12px; width: 24px; height: 24px; background: rgba(0,0,0,0.7); cursor: nwse-resize; border-radius: 50%; z-index: 10; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">⇲</div>
+        </div>`;
+        updateContent(selectedNote.content + imgWrapper);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const exportAsHTML = () => {
+    const content = `
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HyFarm - Serveur Minecraft</title>
-    <!-- Utilisation de la police Inter via Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Intégration de Tailwind CSS via CDN pour un style moderne -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            /* Arrière-plan sombre avec un dégradé subtil */
-            background-color: #1a202c;
-        }
-        .container {
-            max-width: 900px;
-        }
-        .card {
-            background-color: #2d3748;
-        }
-        .btn-copy {
-            /* Styles de bouton personnalisés */
-            transition: all 0.3s ease;
-        }
-        .btn-copy:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>${selectedNote.title || 'Sans titre'}</title>
+  <style>
+    body {
+      font-family: 'Georgia', serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1 {
+      color: #78350f;
+      border-bottom: 2px solid #fbbf24;
+      padding-bottom: 10px;
+    }
+    img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin: 16px 0;
+    }
+  </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4 md:p-8 text-white">
-
-    <!-- Conteneur principal centré -->
-    <div class="container mx-auto text-center">
-
-        <!-- En-tête de la page -->
-        <header class="mb-12">
-            <h1 class="text-5xl md:text-6xl font-bold text-teal-400 mb-2">HyFarm</h1>
-            <p class="text-xl md:text-2xl text-gray-300">Rejoignez-nous sur notre serveur Minecraft !</p>
-            <p class="text-md md:text-lg text-gray-400 mt-2">Serveur disponible pour les éditions <strong class="font-bold text-gray-200">Java</strong> et <strong class="font-bold text-gray-200">Bedrock</strong>.</p>
-        </header>
-
-        <!-- Cartes d'information pour chaque édition -->
-        <main class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            
-            <!-- Carte pour l'édition Java -->
-            <div class="card rounded-2xl p-8 shadow-xl border border-gray-700">
-                <h2 class="text-3xl font-bold text-gray-200 mb-4">Minecraft Java</h2>
-                <p class="text-gray-400 mb-4">Pour les joueurs sur PC, Mac et Linux.</p>
-                <div class="bg-gray-700 rounded-xl p-4 mb-4 flex justify-between items-center flex-wrap">
-                    <span class="font-mono text-lg md:text-xl text-teal-300 break-words" id="javaAddress">HyFarm.aternos.me</span>
-                    <button class="btn-copy bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg mt-2 md:mt-0" onclick="copyToClipboard('javaAddress', this)">
-                        Copier
-                    </button>
-                </div>
-            </div>
-
-            <!-- Carte pour l'édition Bedrock -->
-            <div class="card rounded-2xl p-8 shadow-xl border border-gray-700">
-                <h2 class="text-3xl font-bold text-gray-200 mb-4">Minecraft Bedrock</h2>
-                <p class="text-gray-400 mb-4">Pour les joueurs sur mobile, Xbox, PlayStation, Switch et Windows 10/11.</p>
-                
-                <div class="bg-gray-700 rounded-xl p-4 mb-4 flex justify-between items-center flex-wrap">
-                    <div class="text-left w-full md:w-auto">
-                        <span class="block font-bold text-lg text-gray-300">Adresse</span>
-                        <span class="font-mono text-lg md:text-xl text-teal-300 break-words" id="bedrockAddress">HyFarm.aternos.me</span>
-                    </div>
-                    <button class="btn-copy bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg mt-2 md:mt-0" onclick="copyToClipboard('bedrockAddress', this)">
-                        Copier
-                    </button>
-                </div>
-
-                <div class="bg-gray-700 rounded-xl p-4 flex justify-between items-center flex-wrap">
-                    <div class="text-left w-full md:w-auto">
-                        <span class="block font-bold text-lg text-gray-300">Port</span>
-                        <span class="font-mono text-lg md:text-xl text-teal-300" id="bedrockPort">19132</span>
-                    </div>
-                    <button class="btn-copy bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg mt-2 md:mt-0" onclick="copyToClipboard('bedrockPort', this)">
-                        Copier
-                    </button>
-                </div>
-            </div>
-
-        </main>
-
-        <!-- Pied de page -->
-        <footer class="mt-12 text-gray-500 text-sm">
-            <p>Hébergé par Aternos. Serveur sujet aux démarrages et arrêts manuels.</p>
-        </footer>
-    </div>
-
-    <!-- Script JavaScript pour la fonctionnalité de copie -->
-    <script>
-        /**
-         * Copie le texte d'un élément vers le presse-papiers en utilisant
-         * une méthode qui fonctionne de manière fiable dans la plupart des environnements.
-         * @param {string} elementId L'ID de l'élément contenant le texte à copier.
-         * @param {HTMLElement} buttonElement Le bouton qui a déclenché l'action.
-         */
-        function copyToClipboard(elementId, buttonElement) {
-            const element = document.getElementById(elementId);
-            const textToCopy = element.innerText || element.textContent;
-
-            // Création d'un élément temporaire pour la copie
-            const tempInput = document.createElement('textarea');
-            tempInput.value = textToCopy;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            
-            // Exécution de la commande de copie
-            document.execCommand('copy');
-            
-            document.body.removeChild(tempInput);
-
-            // Rétroaction visuelle pour l'utilisateur
-            const originalText = buttonElement.innerText;
-            buttonElement.innerText = 'Copié !';
-            setTimeout(() => {
-                buttonElement.innerText = originalText;
-            }, 2000);
-        }
-    </script>
+<body>
+  <h1>${selectedNote.title || 'Sans titre'}</h1>
+  ${selectedNote.content.replace(/<div class="image-wrapper"[^>]*>/g, '<div>').replace(/<button[^>]*delete-image-btn[^>]*>.*?<\/button>/g, '').replace(/<div[^>]*resize-handle[^>]*><\/div>/g, '')}
 </body>
 </html>
+    `;
+    
+    const blob = new Blob([content], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${selectedNote.title || 'note'}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportAsMarkdown = () => {
+    let markdown = `# ${selectedNote.title || 'Sans titre'}\n\n`;
+    
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = selectedNote.content;
+    
+    const text = tempDiv.innerText || tempDiv.textContent;
+    markdown += text;
+    
+    const blob = new Blob([markdown], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${selectedNote.title || 'note'}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportAsText = () => {
+    let text = `${selectedNote.title || 'Sans titre'}\n${'='.repeat((selectedNote.title || 'Sans titre').length)}\n\n`;
+    
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = selectedNote.content;
+    
+    text += tempDiv.innerText || tempDiv.textContent;
+    
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${selectedNote.title || 'note'}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDragStart = (e, note) => {
+    setDraggedNote(note);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e, note) => {
+    e.preventDefault();
+    if (draggedNote && draggedNote.id !== note.id) {
+      setDragOverNote(note);
+    }
+  };
+
+  const handleDrop = (e, targetNote) => {
+    e.preventDefault();
+    if (draggedNote && draggedNote.id !== targetNote.id) {
+      const draggedIdx = notes.findIndex(n => n.id === draggedNote.id);
+      const targetIdx = notes.findIndex(n => n.id === targetNote.id);
+      
+      const newNotes = [...notes];
+      newNotes.splice(draggedIdx, 1);
+      newNotes.splice(targetIdx, 0, draggedNote);
+      
+      setNotes(newNotes);
+    }
+    setDraggedNote(null);
+    setDragOverNote(null);
+  };
+
+  useEffect(() => {
+    if (!contentRef.current) return;
+
+    let draggedWrapper = null;
+    let isDragging = false;
+    let startX, startY, startWidth, startHeight;
+    let resizingWrapper = null;
+
+    const handleMouseDown = (e) => {
+      const wrapper = e.target.closest('.image-wrapper');
+      if (!wrapper) return;
+
+      if (e.target.classList.contains('resize-handle')) {
+        e.preventDefault();
+        resizingWrapper = wrapper;
+        const img = wrapper.querySelector('img');
+        startX = e.clientX;
+        startY = e.clientY;
+        startWidth = img.offsetWidth;
+        startHeight = img.offsetHeight;
+      } else if (e.target.classList.contains('delete-image-btn')) {
+        e.preventDefault();
+        wrapper.remove();
+        updateContent(contentRef.current.innerHTML);
+      } else if (e.target.tagName === 'IMG') {
+        e.preventDefault();
+        draggedWrapper = wrapper;
+        isDragging = true;
+        wrapper.style.opacity = '0.5';
+      }
+    };
+
+    const handleMouseMove = (e) => {
+      if (resizingWrapper) {
+        e.preventDefault();
+        const img = resizingWrapper.querySelector('img');
+        const deltaX = e.clientX - startX;
+        const newWidth = Math.max(200, Math.min(startWidth + deltaX, contentRef.current.offsetWidth - 40));
+        resizingWrapper.style.maxWidth = newWidth + 'px';
+      } else if (isDragging && draggedWrapper) {
+        const target = document.elementFromPoint(e.clientX, e.clientY);
+        const targetWrapper = target?.closest('.image-wrapper');
+        
+        if (targetWrapper && targetWrapper !== draggedWrapper) {
+          const rect = targetWrapper.getBoundingClientRect();
+          const midpoint = rect.top + rect.height / 2;
+          
+          if (e.clientY < midpoint) {
+            targetWrapper.parentNode.insertBefore(draggedWrapper, targetWrapper);
+          } else {
+            targetWrapper.parentNode.insertBefore(draggedWrapper, targetWrapper.nextSibling);
+          }
+        }
+      }
+    };
+
+    const handleMouseUp = (e) => {
+      if (resizingWrapper) {
+        resizingWrapper = null;
+        updateContent(contentRef.current.innerHTML);
+      } else if (isDragging && draggedWrapper) {
+        draggedWrapper.style.opacity = '1';
+        draggedWrapper = null;
+        isDragging = false;
+        updateContent(contentRef.current.innerHTML);
+      }
+    };
+
+    const content = contentRef.current;
+    content.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      content.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [selectedNote]);
+
+  return (
+    <div className="flex h-screen bg-amber-50" style={{ fontFamily: "'Crimson Text', 'Georgia', serif" }}>
+      {/* Sidebar */}
+      <div
+        onMouseEnter={() => setIsSidebarExpanded(true)}
+        onMouseLeave={() => setIsSidebarExpanded(false)}
+        className={`${
+          isSidebarExpanded ? 'w-80' : 'w-20'
+        } transition-all duration-300 border-r border-amber-200 flex flex-col bg-amber-100 flex-shrink-0`}
+      >
+        <div className="p-4 border-b border-amber-200 flex-shrink-0">
+          <button
+            onClick={addNote}
+            className={`${
+              isSidebarExpanded ? 'w-full justify-center' : 'w-12 h-12 justify-center'
+            } flex items-center gap-2 px-4 py-3 bg-amber-800 text-amber-50 rounded-lg hover:bg-amber-900 transition-all`}
+            title="Nouvelle note"
+          >
+            <Plus size={20} />
+            {isSidebarExpanded && <span>Nouvelle note</span>}
+          </button>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto flex-shrink-0">
+          {notes.map(note => (
+            <div
+              key={note.id}
+              draggable={!isEditing}
+              onDragStart={(e) => handleDragStart(e, note)}
+              onDragOver={(e) => handleDragOver(e, note)}
+              onDrop={(e) => handleDrop(e, note)}
+              onClick={() => setSelectedNote(note)}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setContextMenu({ x: e.clientX, y: e.clientY, noteId: note.id });
+              }}
+              className={`p-4 cursor-pointer border-b border-amber-200 hover:bg-amber-200 transition-all ${
+                selectedNote?.id === note.id ? 'bg-amber-300 shadow-lg scale-105 my-2' : ''
+              } ${dragOverNote?.id === note.id ? 'border-t-4 border-t-amber-800' : ''}`}
+            >
+              {isEditing === note.id ? (
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  onBlur={() => finishEditingTitle(note.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') finishEditingTitle(note.id);
+                    if (e.key === 'Escape') {
+                      setIsEditing(null);
+                      setEditTitle('');
+                    }
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full font-medium text-amber-900 bg-white border border-amber-300 rounded px-2 py-1 outline-none"
+                  placeholder="Titre de la note"
+                />
+              ) : (
+                <>
+                  {isSidebarExpanded ? (
+                    <>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="font-semibold text-amber-900 flex-1 min-w-0 truncate">
+                          {note.title || 'Sans titre'}
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteNote(note.id);
+                          }}
+                          className="text-amber-700 hover:text-red-600 transition-colors flex-shrink-0"
+                          title="Supprimer"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                      <p className="text-sm text-amber-700 mt-1 line-clamp-2">
+                        {note.content.replace(/<[^>]*>/g, '').substring(0, 60)}
+                      </p>
+                    </>
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <Edit2 size={20} className="text-amber-700" />
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <div
+          className="fixed bg-white border-2 border-amber-300 rounded-lg shadow-xl py-2 z-50"
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            onClick={() => {
+              const note = notes.find(n => n.id === contextMenu.noteId);
+              if (note) {
+                setIsEditing(note.id);
+                setEditTitle(note.title);
+              }
+              setContextMenu(null);
+            }}
+            className="w-full px-4 py-2 text-left text-amber-900 hover:bg-amber-100 flex items-center gap-2"
+          >
+            <Edit2 size={16} />
+            Changer le titre
+          </button>
+        </div>
+      )}
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {selectedNote ? (
+          <>
+            <div className="border-b border-amber-200 p-6 bg-white flex items-center justify-between flex-shrink-0">
+              <div className="text-3xl font-bold text-amber-900 flex-1 min-w-0 mr-4">
+                {selectedNote.title || 'Sans titre'}
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="relative group">
+                  <button
+                    className="p-2 text-amber-700 hover:bg-amber-100 rounded-lg transition-colors"
+                    title="Exporter"
+                  >
+                    <Download size={24} />
+                  </button>
+                  <div className="absolute right-0 top-full mt-2 bg-white border-2 border-amber-300 rounded-lg shadow-xl py-2 hidden group-hover:block w-48 z-50">
+                    <button
+                      onClick={exportAsHTML}
+                      className="w-full px-4 py-2 text-left text-amber-900 hover:bg-amber-100 transition-colors"
+                    >
+                      Exporter en HTML
+                    </button>
+                    <button
+                      onClick={exportAsMarkdown}
+                      className="w-full px-4 py-2 text-left text-amber-900 hover:bg-amber-100 transition-colors"
+                    >
+                      Exporter en Markdown
+                    </button>
+                    <button
+                      onClick={exportAsText}
+                      className="w-full px-4 py-2 text-left text-amber-900 hover:bg-amber-100 transition-colors"
+                    >
+                      Exporter en Texte
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-1 p-6 overflow-y-auto bg-white">
+              <div
+                ref={contentRef}
+                contentEditable
+                suppressContentEditableWarning
+                onInput={(e) => updateContent(e.currentTarget.innerHTML)}
+                dangerouslySetInnerHTML={{ __html: selectedNote.content }}
+                className="min-h-full outline-none text-amber-900 leading-relaxed text-lg"
+                style={{ wordWrap: 'break-word' }}
+              />
+            </div>
+
+            <div className="border-t border-amber-200 p-4 bg-white flex-shrink-0">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2 px-4 py-2 text-amber-800 hover:bg-amber-100 rounded-lg transition-colors"
+              >
+                <Image size={20} />
+                Ajouter une image
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-amber-600 bg-white">
+            <div className="text-center">
+              <p className="text-xl">Sélectionnez ou créez une note</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
